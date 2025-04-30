@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -47,6 +48,8 @@ fun WeatherPage(viewModel: WeatherViewModel){
     var city by remember { mutableStateOf("") }
 
     val weatherResult = viewModel.weatherResult.observeAsState()
+
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Column (
         Modifier
@@ -68,7 +71,11 @@ fun WeatherPage(viewModel: WeatherViewModel){
             )
 
             IconButton(
-                onClick = { viewModel.getData(city) }
+                onClick = {
+                    viewModel.getData(city)
+                    keyboardController?.hide()
+                }
+
             ) {
                 Icon(
                     imageVector = Icons.Default.Search,
@@ -147,11 +154,37 @@ fun WeatherDetails(data : WeatherModel){
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround
                 ){
-
+                    WeatherKeyVal("Humidity", data.current.humidity)
+                    WeatherKeyVal("Wind Speed", data.current.wind_kph + "km/h")
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ){
+                    WeatherKeyVal("UV", data.current.uv)
+                    WeatherKeyVal("Participation", data.current.precip_mm + "mm")
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ){
+                    WeatherKeyVal("Local time", data.location.localtime.split(" ")[1])
+                    WeatherKeyVal("Local date", data.location.localtime.split(" ")[0])
                 }
             }
         }
 
 
+    }
+}
+
+@Composable
+fun WeatherKeyVal(key : String, value : String){
+    Column (
+        modifier = Modifier.padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        Text(text = value, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Text(text = key, fontWeight = FontWeight.SemiBold, color = Color.Gray)
     }
 }
